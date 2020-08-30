@@ -7,25 +7,30 @@ namespace XCloud.GetPeers.Api.Persistance
 {
     public class PeerListRepository : IPeerListRepository
     {
-        private Dictionary<string, List<Peer>> _peers;
+        private Dictionary<string, Dictionary<string, List<Peer>>> _peers;
 
         public PeerListRepository()
         {
-            _peers = new Dictionary<string, List<Peer>>();
+            _peers = new Dictionary<string, Dictionary<string, List<Peer>>>();
         }
-        public void AddPeers(List<Peer> peers)
+        public void AddPeers(string coin, List<Peer> peers)
         {
+            if (!_peers.ContainsKey(coin))
+                _peers.Add(coin, new Dictionary<string, List<Peer>>());
+
+            var peersCoin = _peers[coin];
+
             string version;
             var yesterday = DateTime.Now.AddDays(-1);
             peers.ForEach(p =>
             {
                 version = p.Version;
 
-                if (!_peers.ContainsKey(version))
-                    _peers.Add(version, new List<Peer>() { p });
+                if (!peersCoin.ContainsKey(version))
+                    peersCoin.Add(version, new List<Peer>() { p });
                 else
                 {
-                    var currentPeers = _peers[version];
+                    var currentPeers = peersCoin[version];
 
                     currentPeers.RemoveAll(p => p.LastSeen < yesterday);
 
@@ -39,15 +44,20 @@ namespace XCloud.GetPeers.Api.Persistance
             });
         }
 
-        public List<Peer> GetPeers(string version, bool all = false)
+        public List<Peer> GetPeers(string coin, string version, bool all = false)
         {
-            if (_peers.ContainsKey(version))
-                return _peers[version];
+            if (!_peers.ContainsKey(coin))
+                _peers.Add(coin, new Dictionary<string, List<Peer>>());
+
+            var peersCoin = _peers[coin];
+
+            if (peersCoin.ContainsKey(version))
+                return peersCoin[version];
 
             if (all)
             {
                 var peers = new List<Peer>();
-                foreach (var entry in _peers)
+                foreach (var entry in peersCoin)
                 {
                     peers.AddRange(entry.Value);
                 }

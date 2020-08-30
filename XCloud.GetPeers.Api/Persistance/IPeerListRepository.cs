@@ -5,8 +5,8 @@ namespace XCloud.GetPeers.Api.Persistance
 {
     public interface IPeerListRepository
     {
-        void AddPeers(List<Peer> peers);
+        void AddPeers(string coin, List<Peer> peers);
 
-        List<Peer> GetPeers(string version, bool all = false);
+        List<Peer> GetPeers(string coin, string version, bool all = false);
     }
 }

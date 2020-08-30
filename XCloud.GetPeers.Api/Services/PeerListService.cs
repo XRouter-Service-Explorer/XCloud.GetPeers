@@ -1,6 +1,7 @@
 ﻿using Blocknet.Lib.Services.Coins.Cryptocoin;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,15 +14,15 @@ namespace XCloud.GetPeers.Api.Services
     {
         private Timer _timer;
         private readonly IPeerListRepository _repository;
-        private readonly ICryptocoinService _cryptoCoinService;
+        private readonly IEnumerable<ICryptocoinService> _cryptoCoinServices;
 
         public PeerListService(
             IPeerListRepository repository,
-            ICryptocoinService cryptoCoinService
+            IEnumerable<ICryptocoinService> cryptoCoinServices
             )
         {
             _repository = repository;
-            _cryptoCoinService = cryptoCoinService;
+            _cryptoCoinServices = cryptoCoinServices;
         }
 
         public void Dispose()
@@ -32,29 +33,34 @@ namespace XCloud.GetPeers.Api.Services
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _timer = new Timer(DoWork, null, TimeSpan.Zero,
-            TimeSpan.FromSeconds(15));
+            TimeSpan.FromSeconds(20));
 
             return Task.CompletedTask;
         }
 
         private void DoWork(object state)
         {
-            var peerInfo = _cryptoCoinService.GetPeerInfo();
-
-            var peers = peerInfo.Select(p =>
+            foreach (var cryptoService in _cryptoCoinServices)
             {
-                string version = p.SubVer.Split(":")[1];
-                version = version.Remove(version.Length - 1);
-                return new Peer
-                {
-                    Address = p.Addr.Split(":")[0],
-                    Version = version,
-                    LastSeen = DateTime.Now
-                };
-            }).ToList();
+                var peerInfo = cryptoService.GetPeerInfo();
 
-            _repository.AddPeers(peers);
+                var peers = peerInfo
+                    .Where(p => !string.IsNullOrWhiteSpace(p.SubVer))
+                    .Select(p =>
+                    {
+                        string version = p.SubVer.Split(":")[1];
+                        version = version.Remove(version.Length - 1);
+                        return new Peer
+                        {
+                            Address = p.Addr.Split(":")[0],
+                            Version = version,
+                            LastSeen = DateTime.Now
+                        };
+                    })
+                    .ToList();
 
+                _repository.AddPeers(cryptoService.Parameters.CoinShortName, peers);
+            }
         }
 
 

@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using XCloud.GetPeers.Api.Persistance;
-using XCloud.GetPeers.Api.Services;
 
 namespace XCloud.GetPeers.Api
 {
@@ -25,27 +25,28 @@ namespace XCloud.GetPeers.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
-            var rpcSettings = Configuration.GetSection("CoinConfig").Get<CoinRpcConfig>();
+            var rpcInputs = Configuration.GetSection("CoinConfig").Get<List<RpcInput>>();
             services.AddTransient<ICoinService, CoinService>();
 
-            services.AddTransient<ICryptocoinService>(service =>
+            foreach (var rpcInput in rpcInputs)
             {
-                var svc = new CryptocoinService(
-                    //rpcSettings.Blocknet.DaemonUrl_testnet, 
-                    rpcSettings.CryptoCoin.DaemonUrl,
-                    rpcSettings.CryptoCoin.RpcUserName,
-                    rpcSettings.CryptoCoin.RpcPassword,
-                    rpcSettings.CryptoCoin.WalletPassword,
-                    rpcSettings.CryptoCoin.RpcRequestTimeoutInSeconds
-                    );
-                svc.Parameters.CoinShortName = rpcSettings.CryptoCoin.CoinShortName;
-                svc.Parameters.CoinLongName = rpcSettings.CryptoCoin.CoinLongName;
-                return svc;
-            });
+                services.AddTransient<ICryptocoinService>(service =>
+                {
+                    var svc = new CryptocoinService(
+                        rpcInput.DaemonUrl,
+                        rpcInput.RpcUserName,
+                        rpcInput.RpcPassword,
+                        rpcInput.WalletPassword,
+                        rpcInput.RpcRequestTimeoutInSeconds
+                        );
+                    svc.Parameters.CoinShortName = rpcInput.CoinShortName;
+                    svc.Parameters.CoinLongName = rpcInput.CoinLongName;
+                    return svc;
+                });
+            }
 
             services.AddSingleton<IPeerListRepository, PeerListRepository>();
-            services.AddHostedService<PeerListService>();
+            //services.AddHostedService<PeerListService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
