@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using XCloud.GetPeers.Api.Model;
 using XCloud.GetPeers.Api.Persistance;
 
@@ -30,7 +31,7 @@ namespace XCloud.GetPeers.Api.Controllers
             if (string.IsNullOrEmpty(parameters[0]))
                 return BadRequest("No coin name provided");
             else
-                coinName = parameters[0];
+                coinName = parameters[0].ToUpper();
 
             if (string.IsNullOrEmpty(parameters[1]))
                 return BadRequest("No coin version provided");
@@ -65,7 +66,7 @@ namespace XCloud.GetPeers.Api.Controllers
 
             addresses.ForEach(ad =>
             {
-                peerssResponse += "addnode=" + ad + Environment.NewLine;
+                peerssResponse += "addnode=" + Regex.Replace(ad, @"\s+", "") + Environment.NewLine;
             });
 
             return Content(peerssResponse);
@@ -79,7 +80,7 @@ namespace XCloud.GetPeers.Api.Controllers
             if (string.IsNullOrEmpty(parameters[0]))
                 return BadRequest("No coin name provided");
             else
-                coinName = parameters[0];
+                coinName = parameters[0].ToUpper();
 
             if (string.IsNullOrEmpty(parameters[1]))
                 return BadRequest("No coin version provided");
@@ -105,7 +106,7 @@ namespace XCloud.GetPeers.Api.Controllers
 
                 peers.ForEach(ad =>
                 {
-                    peerssResponse += "addnode=" + ad.Address + Environment.NewLine;
+                    peerssResponse += "addnode=" + Regex.Replace(ad.Address, @"\s+", "") + Environment.NewLine;
                 });
 
                 return Content(peerssResponse);
