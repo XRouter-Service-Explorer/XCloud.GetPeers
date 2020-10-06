@@ -8,4 +8,5 @@
 */obj
 **/.toolstarget
 .idea
-Xrouter.Service.Explorer/*
+*/appsettings.Development.json
+*/getPeerList.config.json

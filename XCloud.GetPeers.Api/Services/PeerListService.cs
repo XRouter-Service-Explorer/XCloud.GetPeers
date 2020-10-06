@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using XCloud.GetPeers.Api.Model;
@@ -50,9 +51,16 @@ namespace XCloud.GetPeers.Api.Services
                     {
                         string version = p.SubVer.Split(":")[1];
                         version = version.Remove(version.Length - 1);
+
+                        var uri = new Uri("http://" + p.Addr);
+                        string addr = uri.Host;
+                        addr = addr.Replace("[", "");
+                        addr = addr.Replace("]", "");
+                        // Remove all whitespace
+                        addr = Regex.Replace(addr, @"\s+", "");
                         return new Peer
                         {
-                            Address = p.Addr.Split(":")[0],
+                            Address = addr,
                             Version = version,
                             LastSeen = DateTime.Now
                         };

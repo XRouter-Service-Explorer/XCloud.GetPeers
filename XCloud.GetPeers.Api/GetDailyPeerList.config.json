@@ -1,0 +1,10 @@
+{
+  "CoinConfig": [
+    {
+      "Coin": "BLOCK",
+      "Endpoint": "172.17.0.1",
+      "RpcUserName": "user",
+      "RpcPassword": "password"
+    }
+  ]
+}

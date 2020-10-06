@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using XCloud.GetPeers.Api.Persistance;
+using XCloud.GetPeers.Api.Services;
 
 namespace XCloud.GetPeers.Api
 {
@@ -46,7 +47,7 @@ namespace XCloud.GetPeers.Api
             }
 
             services.AddSingleton<IPeerListRepository, PeerListRepository>();
-            //services.AddHostedService<PeerListService>();
+            services.AddHostedService<PeerListService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

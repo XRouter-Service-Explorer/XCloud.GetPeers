@@ -10,7 +10,7 @@ using XCloud.GetPeers.Api.Persistance;
 namespace XCloud.GetPeers.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("xrs")]
     public class PeersController : ControllerBase
     {
         private readonly IEnumerable<ICryptocoinService> _cryptoCoinServices;
@@ -22,14 +22,20 @@ namespace XCloud.GetPeers.Api.Controllers
             _repository = repository;
         }
 
-        [HttpGet("[action]")]
-        public IActionResult GetPeerList(string coinName, string version)
+        [HttpPost("[action]")]
+        public IActionResult GetPeerList([FromBody] string[] parameters)
         {
-            if (string.IsNullOrEmpty(coinName))
+            string coinName;
+            string version;
+            if (string.IsNullOrEmpty(parameters[0]))
                 return BadRequest("No coin name provided");
+            else
+                coinName = parameters[0];
 
-            if (string.IsNullOrEmpty(version))
+            if (string.IsNullOrEmpty(parameters[1]))
                 return BadRequest("No coin version provided");
+            else
+                version = parameters[1];
 
             var cryptoService = _cryptoCoinServices.FirstOrDefault(svc => svc.Parameters.CoinShortName.Equals(coinName));
 
@@ -41,7 +47,16 @@ namespace XCloud.GetPeers.Api.Controllers
             if (!version.Equals("0"))
                 peerInfo = peerInfo.Where(p => p.SubVer.Equals("/" + cryptoService.Parameters.CoinLongName + ":" + version + "/")).ToList();
 
-            var addresses = peerInfo.Select(p => p.Addr.Split(":")[0]).ToList();
+            var addresses = peerInfo.Select(p =>
+            {
+                var uri = new Uri("http://" + p.Addr);
+                string host = uri.Host;
+                host = host.Replace("[", "");
+                host = host.Replace("]", "");
+                return host;
+            })
+            .Where(addr => !string.IsNullOrEmpty(addr))
+            .ToList();
 
             if (addresses.Count.Equals(0))
                 return Ok($"No peers of version {version} connected to my {coinName} wallet");
@@ -53,17 +68,23 @@ namespace XCloud.GetPeers.Api.Controllers
                 peerssResponse += "addnode=" + ad + Environment.NewLine;
             });
 
-            return Ok(peerssResponse);
+            return Content(peerssResponse);
         }
 
-        [HttpGet("[action]")]
-        public IActionResult GetDailyPeerList(string coinName, string version)
+        [HttpPost("[action]")]
+        public IActionResult GetDailyPeerList([FromBody] string[] parameters)
         {
-            if (string.IsNullOrEmpty(coinName))
+            string coinName;
+            string version;
+            if (string.IsNullOrEmpty(parameters[0]))
                 return BadRequest("No coin name provided");
+            else
+                coinName = parameters[0];
 
-            if (string.IsNullOrEmpty(version))
+            if (string.IsNullOrEmpty(parameters[1]))
                 return BadRequest("No coin version provided");
+            else
+                version = parameters[1];
 
             if (!_cryptoCoinServices.Any(svc => svc.Parameters.CoinShortName.Equals(coinName)))
                 return BadRequest($"This service node does not have {coinName} configured");
@@ -71,7 +92,7 @@ namespace XCloud.GetPeers.Api.Controllers
             try
             {
                 List<Peer> peers;
-                if (version.Equals("0"))
+                if (parameters[0].Equals("0"))
                     peers = _repository.GetPeers(coinName, version, all: true);
 
                 else
@@ -87,10 +108,11 @@ namespace XCloud.GetPeers.Api.Controllers
                     peerssResponse += "addnode=" + ad.Address + Environment.NewLine;
                 });
 
-                return Ok(peerssResponse);
+                return Content(peerssResponse);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }

@@ -9,7 +9,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="client.sh">
+    <Content Update="GetDailyPeerList.config.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="startgetpeers.sh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
