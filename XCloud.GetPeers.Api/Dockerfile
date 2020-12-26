@@ -15,4 +15,4 @@ COPY --from=build /app/XCloud.GetPeers.Api/out .
 
 RUN ["chmod", "+x", "start-getpeers.sh"]
 
-ENTRYPOINT ["start-getpeers.sh"]
+ENTRYPOINT ["./start-getpeers.sh"]
