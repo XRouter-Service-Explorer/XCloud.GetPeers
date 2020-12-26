@@ -13,4 +13,4 @@ RUN dotnet publish XCloud.GetPeers.Api -c Release -o XCloud.GetPeers.Api/out
 FROM base AS final
 COPY --from=build /app/XCloud.GetPeers.Api/out .
 
-ENTRYPOINT ["dotnet XCloud.GetPeers.Api.dll"]
+ENTRYPOINT ["dotnet", "XCloud.GetPeers.Api.dll"]
