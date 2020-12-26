@@ -13,6 +13,6 @@ RUN dotnet publish XCloud.GetPeers.Api -c Release -o XCloud.GetPeers.Api/out
 FROM base AS final
 COPY --from=build /app/XCloud.GetPeers.Api/out .
 
-RUN ["chmod", "+x", "startgetpeers.sh"]
+RUN ["chmod", "+x", "start-getpeers.sh"]
 
 ENTRYPOINT ["start-getpeers.sh"]
