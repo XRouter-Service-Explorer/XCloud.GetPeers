@@ -13,9 +13,6 @@ RUN dotnet publish XCloud.GetPeers.Api -c Release -o XCloud.GetPeers.Api/out
 FROM base AS final
 COPY --from=build /app/XCloud.GetPeers.Api/out .
 
-RUN mkdir -p config
-
 RUN ["chmod", "+x", "startgetpeers.sh"]
 
-COPY XCloud.GetPeers.Api/startgetpeers.sh /usr/local/bin/
-ENTRYPOINT ["startgetpeers.sh"]
+ENTRYPOINT ["start-getpeers.sh"]

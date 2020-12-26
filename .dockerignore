@@ -1,4 +1,5 @@
 .dockerignore
+Dockerfile
 .env
 .git
 .gitignore
@@ -7,6 +8,5 @@
 */bin
 */obj
 **/.toolstarget
-.idea
-*/appsettings.Development.json
-*/getPeerList.config.json
+appsettings.Development.json
+GetDailyPeerList.conf
