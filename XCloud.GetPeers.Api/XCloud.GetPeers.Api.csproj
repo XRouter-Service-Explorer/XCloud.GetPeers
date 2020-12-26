@@ -8,4 +8,10 @@
     <PackageReference Include="Blocknet.Lib" Version="1.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="start-getpeers.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
