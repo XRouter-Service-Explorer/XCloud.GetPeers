@@ -1,4 +1,6 @@
-﻿using Blocknet.Lib.Services.Coins.Cryptocoin;
+﻿using Blocknet.Lib.ExceptionHandling.Rpc;
+using Blocknet.Lib.Responses;
+using Blocknet.Lib.Services.Coins.Cryptocoin;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -42,9 +44,24 @@ namespace XCloud.GetPeers.Api.Services
         {
             foreach (var cryptoService in _cryptoCoinServices)
             {
-                var peerInfo = cryptoService.GetPeerInfo();
+                List<GetPeerInfoResponse> peerInfoRespone;
+                try
+                {
+                    peerInfoRespone = cryptoService.GetPeerInfo();
 
-                var peers = peerInfo
+                }
+                catch (RpcException e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                    return;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                    return;
+                }
+
+                var peers = peerInfoRespone
                     .Where(p => !string.IsNullOrWhiteSpace(p.SubVer))
                     .Select(p =>
                     {
